@@ -3,7 +3,8 @@ from collections import OrderedDict
 import json
 from block import Block
 from transaction import Transaction 
-from hash_util import hash_block, hash_string_256
+from hash_util import hash_block
+from verification import Verification
 
 MINING_REWARD = 10
 owner = 'Henry'
@@ -76,17 +77,12 @@ def get_last_blockchain_value():
     return blockchain[-1]
 
 
-def verify_txn(txn):
-    sender_balance = get_balance(txn.sender)
-    return sender_balance >= txn.amount
-
-
 def add_txn(recipient, sender=owner,  amount=1.0):
 
     txn = Transaction(sender, recipient,amount)
+    verifier = Verification()
 
-
-    if verify_txn(txn):
+    if verifier.verify_txn(txn, get_balance):
         open_txns.append(txn)
         save_data()
         return True
@@ -109,35 +105,13 @@ def print_blockchain_elements():
         print("outputting block")
         print(block)
 
-
-def verify_chain():
-    for (idx, block) in enumerate(blockchain):
-        if(idx == 0):
-            continue
-        if(block.previous_hash != hash_block(blockchain[idx - 1])):
-            return False
-        if not valid_proof(block.transactions[:-1], block.previous_hash, block.proof):
-            print("Proof of work is invalid")
-            return False
-    return True
-
-
-def verify_txns():
-    return all([verify_txn[txn] for txn in open_txns])
-
-
-def valid_proof(txns, last_hash, proof):
-    guess = (str([txn.to_ordered_dict() for txn in txns]) + str(last_hash) + str(proof)).encode()
-    guess_hash = hash_string_256(guess)
-    print(guess_hash)
-    return guess_hash[0:2] == "00"
-
-
 def proof_of_work():
     last_block = blockchain[-1]
     last_hash = hash_block(last_block)
     proof = 0
-    while not valid_proof(open_txns, last_hash, proof):
+
+    verifier = Verification()
+    while not verifier.valid_proof(open_txns, last_hash, proof):
         proof += 1
     return proof
 
@@ -207,13 +181,15 @@ while waiting_for_input:
     elif(use_choice == "4"):
         print(participants)
     elif(use_choice == "5"):
-        verify_txns()
+        verifier = Verification()
+        verifier.verify_txns(open_txns, get_balance)
     elif(use_choice == "q"):
         waiting_for_input = False
     else:
         print("invalid input, please try again")
         continue
-    if(not verify_chain()):
+    verifier = Verification()
+    if(not verifier.verify_chain(blockchain)):
         print("invalid blockchain")
         print_blockchain_elements()
         waiting_for_input = False
