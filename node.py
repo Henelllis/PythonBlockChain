@@ -1,6 +1,6 @@
 from blockchain import Blockchain
 from uuid import uuid4
-from verification import Verification
+from utility.verification import Verification
 class Node:
 
     def __init__(self):
