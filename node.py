@@ -1,12 +1,13 @@
 from blockchain import Blockchain
 from uuid import uuid4
 from utility.verification import Verification
+from wallet import Wallet
 class Node:
 
     def __init__(self):
-        # self.id = str(uuid4())
-        self.id = "HENRY"
-        self.blockchain = Blockchain(self.id)
+        # self.wallet.public_key = str(uuid4())
+        self.wallet = Wallet()
+        self.blockchain = Blockchain(self.wallet.public_key)
 
     def get_txn_value(self):
         txn_recipient = input("Enter the recipient of the transaction:")
@@ -32,6 +33,9 @@ class Node:
             print("2: Mine Block")
             print("3: Output block chain")
             print("4: Check Transaction validity")
+            print("5: Create Wallet")
+            print("6: Load Wallet")
+
             print("q: quit")
 
             use_choice = self.get_user_choice()
@@ -39,16 +43,20 @@ class Node:
             if(use_choice == "1"):
                 txn_data = self.get_txn_value()
                 recipient, amount = txn_data
-                if(self.blockchain.add_txn(recipient, self.id, amount=amount)):
+                if(self.blockchain.add_txn(recipient, self.wallet.public_key, amount=amount)):
                     print('added transaction!')
                 else:
                     print('transaction failed')
             elif(use_choice == "2"):
-                self.blockchain.mine_block(self.id)
+                self.blockchain.mine_block(self.wallet.public_key)
             elif(use_choice == "3"):
                 self.print_blockchain_elements()
             elif(use_choice == "4"):
                 Verification.verify_txns(self.blockchain.get_open_txns(), self.blockchain.get_balance)
+            elif(use_choice == "5"):
+                self.wallet.create_keys()
+            elif(use_choice == "6"):
+                pass
             elif(use_choice == "q"):
                 waiting_for_input = False
             else:
@@ -65,5 +73,6 @@ class Node:
         self.print_blockchain_elements()
         print("Done!")
 
-node = Node()
-node.listen_for_input()
+if __name__ == '__main__':
+    node = Node()
+    node.listen_for_input()
