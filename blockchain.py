@@ -113,7 +113,10 @@ class Blockchain:
         return self.__chain[-1]
 
 
-    def add_txn(self, recipient, sender,  amount=1.0):
+    def add_txn(self, recipient, sender, signature, amount=1.0):
+
+        if self.hosting_node is None:
+            return False
 
         txn = Transaction(sender, recipient,amount)
 
@@ -125,6 +128,9 @@ class Blockchain:
 
 
     def mine_block(self, node):
+
+        if self.hosting_node is None:
+            return False
         last_block = self.__chain[-1]
         hashed_block = hash_block(last_block)
         proof = self.proof_of_work()

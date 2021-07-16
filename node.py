@@ -7,6 +7,7 @@ class Node:
     def __init__(self):
         # self.wallet.public_key = str(uuid4())
         self.wallet = Wallet()
+        self.wallet.create_keys()
         self.blockchain = Blockchain(self.wallet.public_key)
 
     def get_txn_value(self):
@@ -35,7 +36,7 @@ class Node:
             print("4: Check Transaction validity")
             print("5: Create Wallet")
             print("6: Load Wallet")
-
+            print("7: save Keys")
             print("q: quit")
 
             use_choice = self.get_user_choice()
@@ -43,20 +44,26 @@ class Node:
             if(use_choice == "1"):
                 txn_data = self.get_txn_value()
                 recipient, amount = txn_data
-                if(self.blockchain.add_txn(recipient, self.wallet.public_key, amount=amount)):
+                signature = self.wallet.sign_transaction(self.wallet.public_key, recipient, amount)
+                if(self.blockchain.add_txn(recipient, self.wallet.public_key, signature, amount=amount)):
                     print('added transaction!')
                 else:
                     print('transaction failed')
             elif(use_choice == "2"):
-                self.blockchain.mine_block(self.wallet.public_key)
+                if not self.blockchain.mine_block(self.wallet.public_key):
+                    print('Mining Failed, no wallet found')
             elif(use_choice == "3"):
                 self.print_blockchain_elements()
             elif(use_choice == "4"):
                 Verification.verify_txns(self.blockchain.get_open_txns(), self.blockchain.get_balance)
             elif(use_choice == "5"):
                 self.wallet.create_keys()
+                self.blockchain = Blockchain(self.wallet.public_key)
             elif(use_choice == "6"):
-                pass
+                self.wallet.load_keys()
+                self.blockchain = Blockchain(self.wallet.public_key)
+            elif(use_choice == "7"):
+                self.wallet.save_keys()
             elif(use_choice == "q"):
                 waiting_for_input = False
             else:
