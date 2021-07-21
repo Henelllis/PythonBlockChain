@@ -1,5 +1,5 @@
 from Crypto.PublicKey import RSA
-from Crypto.Signature import PKCS_v1_5
+from Crypto.Signature import pkcs1_15
 from Crypto.Hash import SHA256
 # from cryptography.fernet import Fernet
 import Crypto.Random
@@ -52,7 +52,7 @@ class Wallet:
 
 
     def sign_transaction(self, sender, recipient, amount):
-        signer = PKCS_v1_5.new(RSA.importKey(binascii.unhexlify(self.private_key)))
+        signer = pkcs1_15.new(RSA.importKey(binascii.unhexlify(self.private_key)))
         h = SHA256.new( (str(sender) + str(recipient)+ str(amount)).encode('utf8'))
         signature = signer.sign(h)
         return binascii.hexlify(signature).decode('ascii')

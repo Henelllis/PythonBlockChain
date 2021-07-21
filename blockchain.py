@@ -35,7 +35,7 @@ class Blockchain:
                 blockchain = json.loads(file_contents[0][:-1])
                 for block in blockchain:
                     updated_blockchain = []
-                    converted_txns = [Transaction(txn['sender'],txn['recipient'],txn['amount'] ) for txn in block['transactions']]
+                    converted_txns = [Transaction(txn['sender'],txn['recipient'],txn['amount'],txn['signature'] ) for txn in block['transactions']]
                     # converted_txns = [OrderedDict(
                     #     [('sender', txn['sender']), ('recipient', txn['recipient']),
                     #      ('amount', txn['amount'])]) for txn in block['transactions']]
@@ -53,7 +53,7 @@ class Blockchain:
                 for txn in open_txns:
                     print("Txn Type from saved file")
                     print(type(txn))
-                    updated_open_txn = Transaction(txn['sender'],txn["recipient"],txn["amount"])
+                    updated_open_txn = Transaction(txn['sender'],txn["recipient"],txn["amount"],txn['signature'])
                     # updated_open_txn = OrderedDict(
                     #     [('sender', txn['sender']), ('recipient', txn["recipient"]), ('amount', txn["amount"])])
                     updated_open_txns.append(updated_open_txn)
@@ -118,7 +118,7 @@ class Blockchain:
         if self.hosting_node is None:
             return False
 
-        txn = Transaction(sender, recipient,amount)
+        txn = Transaction(sender, recipient, amount, signature)
 
         if Verification.verify_txn(txn, self.get_balance):
             self.__open_txns.append(txn)
@@ -130,16 +130,16 @@ class Blockchain:
     def mine_block(self, node):
 
         if self.hosting_node is None:
-            return False
+            return False  
         last_block = self.__chain[-1]
         hashed_block = hash_block(last_block)
         proof = self.proof_of_work()
 
-        reward_txn = Transaction('MINING', node ,MINING_REWARD )
+        reward_txn = Transaction('MINING', node , MINING_REWARD, '' )
 
         copied_txns = self.__open_txns[:]
         copied_txns.append(reward_txn)
-        print(f'hashed_block {hashed_block}')
+        # print(f'hashed_block {hashed_block}')
         block = Block(len(self.__chain), hashed_block, copied_txns, proof)
 
         # open_txns.clear()
