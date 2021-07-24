@@ -33,8 +33,8 @@ class Blockchain:
             with open('blockchain.txt', mode='r') as f:
                 file_contents = f.readlines()
                 blockchain = json.loads(file_contents[0][:-1])
+                updated_blockchain = []
                 for block in blockchain:
-                    updated_blockchain = []
                     converted_txns = [Transaction(txn['sender'],txn['recipient'],txn['amount'],txn['signature'] ) for txn in block['transactions']]
                     # converted_txns = [OrderedDict(
                     #     [('sender', txn['sender']), ('recipient', txn['recipient']),
