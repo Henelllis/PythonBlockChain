@@ -37,6 +37,7 @@ class Node:
             print("5: Create Wallet")
             print("6: Load Wallet")
             print("7: save Keys")
+            print("8: get Balance")
             print("q: quit")
 
             use_choice = self.get_user_choice()
@@ -61,9 +62,12 @@ class Node:
                 self.blockchain = Blockchain(self.wallet.public_key)
             elif(use_choice == "6"):
                 self.wallet.load_keys()
+                print("I hace extracted this public key :: ", self.wallet.public_key)
                 self.blockchain = Blockchain(self.wallet.public_key)
             elif(use_choice == "7"):
                 self.wallet.save_keys()
+            elif(use_choice == "8"):
+                self.blockchain.get_balance()
             elif(use_choice == "q"):
                 waiting_for_input = False
             else:
@@ -78,6 +82,7 @@ class Node:
 
 
         self.print_blockchain_elements()
+        self.blockchain.save_data()
         print("Done!")
 
 if __name__ == '__main__':
