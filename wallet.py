@@ -34,7 +34,8 @@ class Wallet:
             with open('wallet.txt', mode='r') as f:
                 keys = f.readlines()
                 public_key = keys[0][:-1]
-                private_key = keys[2]
+                print("I LITERALLY GOT THIS public_key FROM THE FILE! :: ",public_key)
+                private_key = keys[1]
                 self.public_key = public_key
                 self.private_key = private_key        
         except(IOError, IndexError):
