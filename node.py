@@ -62,7 +62,6 @@ class Node:
                 self.blockchain = Blockchain(self.wallet.public_key)
             elif(use_choice == "6"):
                 self.wallet.load_keys()
-                print("I hace extracted this public key :: ", self.wallet.public_key)
                 self.blockchain = Blockchain(self.wallet.public_key)
             elif(use_choice == "7"):
                 self.wallet.save_keys()

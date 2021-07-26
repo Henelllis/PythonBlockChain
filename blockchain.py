@@ -4,6 +4,9 @@ from block import Block
 from transaction import Transaction 
 from utility.hash_util import hash_block
 from utility.verification import Verification
+from wallet import Wallet
+
+
 MINING_REWARD = 10
 participants = {'Henry'}
 
@@ -119,7 +122,8 @@ class Blockchain:
             return False
 
         txn = Transaction(sender, recipient, amount, signature)
-
+        if not Wallet.verify_transaction(txn):
+            return False
         if Verification.verify_txn(txn, self.get_balance):
             self.__open_txns.append(txn)
             self.save_data()
@@ -141,7 +145,9 @@ class Blockchain:
         copied_txns.append(reward_txn)
         # print(f'hashed_block {hashed_block}')
         block = Block(len(self.__chain), hashed_block, copied_txns, proof)
-
+        for txn in block.transactions:
+            if not Wallet.verify_transaction(txn):
+                return False
         # open_txns.clear()
         self.__chain.append(block)
         self.save_data()
