@@ -1,7 +1,7 @@
 """Provides verification helper modules."""
 
 from utility.hash_util import hash_block, hash_string_256
-
+from wallet import Wallet
 class Verification:
     @staticmethod
     def valid_proof( txns, last_hash, proof):
@@ -21,9 +21,12 @@ class Verification:
                 return False
         return True
     @staticmethod
-    def verify_txn( txn, get_balance):
-        sender_balance = get_balance()
-        return sender_balance >= txn.amount
+    def verify_txn( txn, get_balance, check_funds=True):
+        if check_funds:
+            sender_balance = get_balance()
+            return sender_balance >= txn.amount and Wallet.verify_transaction(txn)
+        else:
+            return Wallet.verify_transaction(txn)
     @classmethod
     def verify_txns(cls, open_txns, get_balance):
-        return all([cls.verify_txn(txn, get_balance) for txn in open_txns])
+        return all([cls.verify_txn(txn, get_balance, False) for txn in open_txns])

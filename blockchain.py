@@ -122,8 +122,7 @@ class Blockchain:
             return False
 
         txn = Transaction(sender, recipient, amount, signature)
-        if not Wallet.verify_transaction(txn):
-            return False
+
         if Verification.verify_txn(txn, self.get_balance):
             self.__open_txns.append(txn)
             self.save_data()
@@ -142,12 +141,13 @@ class Blockchain:
         reward_txn = Transaction('MINING', node , MINING_REWARD, '' )
 
         copied_txns = self.__open_txns[:]
+        for txn in copied_txns:
+            if not Wallet.verify_transaction(txn):
+                return False
         copied_txns.append(reward_txn)
         # print(f'hashed_block {hashed_block}')
         block = Block(len(self.__chain), hashed_block, copied_txns, proof)
-        for txn in block.transactions:
-            if not Wallet.verify_transaction(txn):
-                return False
+
         # open_txns.clear()
         self.__chain.append(block)
         self.save_data()
