@@ -24,22 +24,27 @@ class Wallet:
                     f.write(self.public_key)
                     f.write("\n")
                     f.write(self.private_key)
+                return True
             except (IOError, IndexError):
                 print('saving wallet failed')
+                return False
         else:
             print("Keys have not been generated")
+            return False
+
 
     def load_keys(self):
         try:
             with open('wallet.txt', mode='r') as f:
                 keys = f.readlines()
                 public_key = keys[0][:-1]
-                print("I LITERALLY GOT THIS public_key FROM THE FILE! :: ",public_key)
                 private_key = keys[1]
                 self.public_key = public_key
-                self.private_key = private_key        
+                self.private_key = private_key
+            return True          
         except(IOError, IndexError):
             print('Loading wallet failed')
+            return False
 
             # f.read(public_key)
             # f.write("\n")
