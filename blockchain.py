@@ -92,6 +92,10 @@ class Blockchain:
 
 
     def get_balance(self):
+
+        if self.hosting_node is None:
+            return None
+
         participant = self.hosting_node
         txn_sender = [[txn.amount for txn in block.transactions if txn.sender == participant]
                     for block in self.__chain]
