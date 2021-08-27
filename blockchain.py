@@ -8,7 +8,6 @@ from wallet import Wallet
 
 
 MINING_REWARD = 10
-participants = {'Henry'}
 
 
 class Blockchain:
@@ -19,8 +18,8 @@ class Blockchain:
         self.__open_txns = [] 
         self.load_data()
         self.hosting_node = hosting_node_id
-        # Potentially there but not there , if that makes sense
-        # self.owner = "Henry"
+        self.__peer_nodes = set()
+
 
 
     def get_chain(self):
@@ -51,7 +50,7 @@ class Blockchain:
                     updated_blockchain.append(updated_block)
                 self.__chain = updated_blockchain
 
-                open_txns = json.loads(file_contents[1])
+                open_txns = json.loads(file_contents[1][:-1])
                 updated_open_txns = []
                 for txn in open_txns:
                     print("Txn Type from saved file")
@@ -61,6 +60,8 @@ class Blockchain:
                     #     [('sender', txn['sender']), ('recipient', txn["recipient"]), ('amount', txn["amount"])])
                     updated_open_txns.append(updated_open_txn)
                 self.__open_txns = updated_open_txns
+                peer_nodes = json.loads(file_contents[2])
+                self.__peer_nodes = set(peer_nodes)
         except (IOError, IndexError):
             print("handled exception case...")
 
@@ -77,6 +78,9 @@ class Blockchain:
                 f.write("\n")
                 saveable_txn = [ txn.__dict__ for txn in self.__open_txns ]
                 f.write(json.dumps(saveable_txn))
+                f.write("\n")
+                f.write(json.dumps(list(self.__peer_nodes)))
+
         except IOError:
             print("SAVING FAILED")
 
@@ -159,6 +163,23 @@ class Blockchain:
         self.save_data()
         return block
 
+    def add_peer_node(self, node):
+        """Adds a new node to the peer node set
+            Arguments:
+                :node: The node URL which should be added
+        """
+        self.__peer_nodes.add(node)
+        self.save_data()
 
+    def remove_peer_node(self, node):
+        """Removes node to the peer node set
+            Arguments:
+                :node: The node URL which should be removed
+        """
+        self.__peer_nodes.discard(node)
+        self.save_data()
 
+    def get_peer_nodes(self):
+        """Return a list of all connected peer nodes"""
+        return list(self.__peer_nodes)
 # This is the price
