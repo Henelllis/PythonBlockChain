@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
+from werkzeug.wrappers import response
 from wallet import Wallet
 from blockchain import Blockchain
 
@@ -13,6 +14,11 @@ CORS(app)
 @app.route("/", methods=['GET'])
 def get_ui():
     return send_from_directory('ui', 'node.html')
+
+@app.route("/network", methods=['GET'])
+def get_network_ui():
+    return send_from_directory('ui', 'network.html')
+
 
 @app.route("/wallet", methods=["POST"])
 def create_keys():
@@ -170,6 +176,30 @@ def add_node():
         'message': 'Node added successfully',
         'all_nodes': blockchain.get_peer_nodes()
     }
-    return jsonify(response), 201   
+    return jsonify(response), 201
+
+@app.route('/node/<node_url>', methods=['DELETE'])
+def remove_node(node_url):
+    if node_url == '' or node_url is None:
+        response ={
+            'message': 'No node found'
+        }
+        return jsonify(response), 400
+    blockchain.remove_peer_node(node_url)
+    response = {
+        'message': f'Node {node_url} removed successfully',
+        'all_nodes': blockchain.get_peer_nodes()
+    }
+    return jsonify(response), 200
+
+@app.route('/nodes', methods=['GET'])
+def get_nodes():
+    nodes = blockchain.get_peer_nodes()
+    response = {
+        'all_nodes':nodes
+    }
+    return jsonify(response), 200
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

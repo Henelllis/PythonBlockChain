@@ -15,10 +15,10 @@ class Blockchain:
         genisis_block = Block(0, '', [], 666, 0)
 
         self.__chain = [genisis_block]
-        self.__open_txns = [] 
-        self.load_data()
-        self.hosting_node = hosting_node_id
+        self.__open_txns = []
         self.__peer_nodes = set()
+        self.hosting_node = hosting_node_id
+        self.load_data()
 
 
 
@@ -86,10 +86,13 @@ class Blockchain:
 
 
     def proof_of_work(self):
+        #Get last block
         last_block = self.__chain[-1]
+        #Hash last block
         last_hash = hash_block(last_block)
+        #Nonce is set to zero
         proof = 0
-
+        #Valid Proof
         while not Verification.valid_proof(self.__open_txns, last_hash, proof):
             proof += 1
         return proof
@@ -141,8 +144,10 @@ class Blockchain:
     def mine_block(self):
 
         if self.hosting_node is None:
-            return None  
+            return None
+        # Get last block  
         last_block = self.__chain[-1]
+        #Get sha of block
         hashed_block = hash_block(last_block)
         proof = self.proof_of_work()
 
