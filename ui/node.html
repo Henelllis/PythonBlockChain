@@ -386,7 +386,7 @@
             this.dataLoading = true;
             axios
               .post("/mine")
-              .then((resp) => {
+              .then((response) => {
                 vm.error = null;
                 vm.success = response.data.message;
                 vm.dataLoading = false;

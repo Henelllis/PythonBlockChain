@@ -5,6 +5,9 @@ from wallet import Wallet
 class Verification:
     @staticmethod
     def valid_proof( txns, last_hash, proof):
+        #Take all txns objects into turn them into list and turn into string
+        #Add last hash
+        #proof
         guess = (str([txn.to_ordered_dict() for txn in txns]) + str(last_hash) + str(proof)).encode()
         guess_hash = hash_string_256(guess)
         print(guess_hash)
@@ -23,7 +26,7 @@ class Verification:
     @staticmethod
     def verify_txn( txn, get_balance, check_funds=True):
         if check_funds:
-            sender_balance = get_balance()
+            sender_balance = get_balance(txn.sender)
             return sender_balance >= txn.amount and Wallet.verify_transaction(txn)
         else:
             return Wallet.verify_transaction(txn)
