@@ -157,6 +157,20 @@ class Blockchain:
             return True
         return False
 
+    def add_block(self, block):
+        transactions = [Transaction(txn['sender'], txn['recipient'],  txn['amount'], txn['signature']) for txn in block['transactions']]
+        proof_is_valid = Verification.valid_proof(transactions[:-1], block['previous_hash'], block['proof'])
+        hash_match = hash_block(self.__chain[-1]) == block['previous_hash']
+        if  not proof_is_valid or not hash_match:
+            print('proof_is_valid:',proof_is_valid)
+            print('hash_match:',hash_match)
+
+            return False
+        converted_block = Block(block['index'], block['previous_hash'], transactions, block['proof'], block['timestamp'] )
+        self.save_data()
+        self.__chain.append(converted_block)
+        return True
+
 
     def mine_block(self):
 
@@ -183,6 +197,20 @@ class Blockchain:
         self.save_data()
         self.__open_txns = []
         self.save_data()
+
+        for peer_node in self.__peer_nodes:
+            url = f'http://{peer_node}/broadcast-block'
+            converted_block = block.__dict__.copy()
+            converted_block['transactions'] = [txn.__dict__ for txn in converted_block['transactions']]
+            try:
+                response = requests.post(url, json={'block':converted_block })
+                if response.status_code == 400 or response.status_code == 500:
+                    print('Block declined, please resolve')
+                elif response.status_code == 409:
+                    print('indices way OFF!')
+
+            except requests.exceptions.ConnectionError:
+                continue
         return block
 
     def add_peer_node(self, node):
