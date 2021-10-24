@@ -20,6 +20,7 @@ class Blockchain:
         self.__peer_nodes = set()
         self.public_key = public_key
         self.node_id = node_id
+        self.resolve_conflicts = False
         self.load_data()
 
 
@@ -48,7 +49,6 @@ class Blockchain:
                         block['index'], block['previous_hash'], converted_txns,
                         block['proof'], block['timestamp'])
 
-                    print('updatedBlock', updated_block)
                     updated_blockchain.append(updated_block)
                 self.__chain = updated_blockchain
 
@@ -134,8 +134,6 @@ class Blockchain:
 
     def add_txn(self, recipient, sender, signature, amount=1.0, is_receiving=False):
 
-        if self.public_key is None:
-            return False
 
         txn = Transaction(sender, recipient, amount, signature)
 
@@ -167,6 +165,17 @@ class Blockchain:
 
             return False
         converted_block = Block(block['index'], block['previous_hash'], transactions, block['proof'], block['timestamp'] )
+
+        stored_transactions = self.__open_txns[:]
+        for incoming_txn in block['transactions']:
+            for open_txn in stored_transactions:
+                if open_txn.sender == incoming_txn['sender'] and open_txn.recipient == incoming_txn['recipient'] \
+                    and open_txn.amount == incoming_txn['amount'] and open_txn.signature == incoming_txn['signature']:
+                    try:
+                        self.__open_txns.remove(open_txn)
+                    except ValueError:
+                        print("item was already removed")
+
         self.save_data()
         self.__chain.append(converted_block)
         return True
@@ -207,7 +216,7 @@ class Blockchain:
                 if response.status_code == 400 or response.status_code == 500:
                     print('Block declined, please resolve')
                 elif response.status_code == 409:
-                    print('indices way OFF!')
+                    self.resolve_conflicts = True
 
             except requests.exceptions.ConnectionError:
                 continue
