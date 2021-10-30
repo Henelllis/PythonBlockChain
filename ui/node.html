@@ -191,6 +191,9 @@
             >
               Mine Coins
             </button>
+            <button class="btn btn-warning" @click="onResolve">
+              Resolve Conflicts
+            </button>
           </div>
         </div>
         <div class="row">
@@ -380,7 +383,6 @@
           },
           onMine: function () {
             var vm = this;
-            this.dataLoading = true;
             axios
               .post("/mine")
               .then((response) => {
@@ -388,6 +390,21 @@
                 vm.success = response.data.message;
                 vm.dataLoading = false;
                 vm.funds = response.data.funds;
+              })
+              .catch((err) => {
+                vm.dataLoading = false;
+                vm.success = null;
+
+                vm.error = err.response.message;
+              });
+          },
+          onResolve: function () {
+            var vm = this;
+            axios
+              .post("/resolve-conflicts")
+              .then((response) => {
+                vm.error = null;
+                vm.success = response.data.message;
               })
               .catch((err) => {
                 vm.dataLoading = false;
