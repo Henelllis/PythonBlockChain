@@ -8,6 +8,8 @@ pycryptodome = "*"
 flask = "*"
 flask-cors = "*"
 requests = "*"
+pep8 = "*"
+pylint = "*"
 
 [dev-packages]
 
