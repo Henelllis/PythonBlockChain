@@ -74,15 +74,12 @@ def get_balance():
 def broadcast_transaction():
     values = request.get_json()
     if not values:
-        print('No data found')
         response = {
             "message": "No data found"
         }
         return jsonify(response), 400
     required = ['sender', 'recipient', 'amount', 'signature']
     if not all(key in values for key in required):
-        print('Missing keys not found')
-        print(str(values))
         response = {
             "message": "Some Data is missing"
         }
@@ -214,6 +211,16 @@ def mine():
             "wallet_set_up": wallet.public_key is not None
         }
         return jsonify(response), 500
+
+@app.route("/resolve-conflicts", methods=['POST'])
+def resolve_conflicts():
+    replaced = blockchain.resolve()
+    if replaced:
+        response = {'message':'Chain was replaced!'}
+    else:
+        response = {'message': 'Local chain kept!'}
+    return jsonify(response), 200
+
 
 @app.route("/transactions", methods=["GET"] )
 def get_open_transactions():

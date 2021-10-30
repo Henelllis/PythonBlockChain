@@ -180,6 +180,33 @@ class Blockchain:
         self.__chain.append(converted_block)
         return True
 
+    def resolve(self):
+        winner_chain = self.__chain
+        replace = False
+        for peer_node in self.__peer_nodes:
+            url = f"http://{peer_node}/chain"
+            try:
+                response = requests.get(url)
+                peer_node_chain = response.json()
+                peer_node_chain = [Block(block['index'], block["previous_hash"], 
+                    [ Transaction(txn['sender'], txn['recipient'], txn['amount'], txn['signature']) for txn in block['transactions']], 
+                    block['proof'], block["timestamp"]) for block in peer_node_chain]
+                node_chain_length = len(peer_node_chain)
+                local_chain_length = len(winner_chain)
+                if node_chain_length > local_chain_length and Verification.verify_chain(peer_node_chain):
+                    winner_chain = peer_node_chain
+                    replace = True
+            except requests.ConnectionError:
+                continue
+        self.resolve_conflicts = False
+        self.__chain = winner_chain
+
+        if replace:
+            self.__open_txns = []
+        self.save_data()
+        return replace
+
+
 
     def mine_block(self):
 
